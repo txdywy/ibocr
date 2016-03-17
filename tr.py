@@ -4,12 +4,34 @@ import numpy as np
 import cv2
 
 im_gray = cv2.imread('st1.png', cv2.CV_LOAD_IMAGE_GRAYSCALE)
-(thr, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+#(thr, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+thr = 180 # to make font with proper with for counter finding
+im_bw = cv2.threshold(im_gray, thr, 255, cv2.THRESH_BINARY)[1]
 cv2.imwrite('bw_image.png', im_bw)
 
 im = cv2.imread('bw_image.png')
 height, width, depth = im.shape
-im = cv2.resize(im,(width*3, height*3))
+height, width = height * 3, width * 3
+im = cv2.resize(im,(width, height))
+
+white = (255,255,255)
+def dl(x):
+    cv2.line(im, (x, 0), (x, height), white)
+    cv2.line(im, (x+1, 0), (x+1, height), white)
+
+# add white split up lines between different close columns
+c = 7
+x = 89
+while c > 0:
+    if c == 2:
+        x -= 2
+    if c == 1:
+        x += 8
+    dl(x)
+    dl(x+23)
+    x += 172
+    c -= 1
+
 im3 = im.copy()
 
 gray = cv2.cvtColor(im,cv2.COLOR_BGR2GRAY)
@@ -26,10 +48,12 @@ samples =  np.empty((0,100))
 responses = []
 keys = [i for i in range(48,58) + range(97,123)] #ascii code 0-9, a=z
 
+
+
 for c in contours:
     [x,y,w,h] = cv2.boundingRect(c)
-    #if  h>20 and w >10 and w < 40:
-    cv2.rectangle(im,(x,y),(x+w,y+h),(152,251,152),2)
+    if  h>20 and w >10 and w < 40:
+        cv2.rectangle(im,(x,y),(x+w,y+h),(152,251,152),2)
 
 
 for cnt in contours:
@@ -57,5 +81,5 @@ responses = responses.reshape((responses.size,1))
 print "training complete"
 print samples
 print responses
-np.savetxt('generalsamples.data',samples)
-np.savetxt('generalresponses.data',responses)
+np.savetxt('ib_samples.data',samples)
+np.savetxt('ib_responses.data',responses)
