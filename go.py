@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from pprint import pprint
+import sys
 
 #######   training part    ############### 
 samples = np.loadtxt('ib_samples.data',np.float32)
@@ -65,6 +67,7 @@ thresh = cv2.adaptiveThreshold(gray,255,1,1,11,2)
 
 contours,hierarchy = cv2.findContours(thresh,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
+result = []
 for cnt in contours:
     if cv2.contourArea(cnt)>10:
         [x,y,w,h] = cv2.boundingRect(cnt)
@@ -77,8 +80,37 @@ for cnt in contours:
             retval, results, neigh_resp, dists = model.find_nearest(roismall, k = 1)
             #string = str(int((results[0][0])))
             string = chr(int(results[0][0]))
-            cv2.putText(out,string,(x,y+h),0,1,(0,255,0))
+            #cv2.putText(out,string,(x,y+h),0,1,(0,255,0))
             cv2.putText(im,string,(x,y+h),0,1,(0,0,255))
+            result.append([ord(string), x, y])
+
+result = np.array(result)
+print result
+ind = np.lexsort((result[:,1],result[:,2]))  
+print result[ind]
+result = result[ind]
+result = result.tolist()
+result = [(chr(x[0]), x[1],x[2]) for x in result]
+
+pprint(result)
+size = len(result)
+if size != 224 * 3:
+    print '=========================error with size %s/672===================' % size
+    sys.exit(0)
+print size/3.0
+c = 0
+keys = []
+while c < 224 * 3:
+    s = []
+    s.append(result[c])
+    s.append(result[c+1])
+    s.append(result[c+2])
+    s = sorted(s, key=lambda x: x[1])
+    s = ''.join([i[0] for i in s])
+    keys.append(s)
+    c += 3
+print keys
+
 
 cv2.imshow('im',im)
 #cv2.imshow('out',out)
