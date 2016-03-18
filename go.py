@@ -111,6 +111,24 @@ while c < 224 * 3:
     c += 3
 print keys
 
+with open('ib_st.txt', 'w') as f:
+    c = 0
+    for i in range(1, 17):
+        s = []
+        for j in range(7):
+            s.append((str(i+j*16) + ' ' + keys[c]).upper())
+            c += 1
+        print ' '.join(s)
+        f.write(' '.join(s) + '\n')
+
+    for i in range(113, 129):
+        s = []
+        for j in range(7):
+            s.append((str(i+j*16) + ' ' + keys[c]).upper())
+            c += 1
+        print ' '.join(s)
+        f.write(' '.join(s) + '\n')
+
 
 cv2.imshow('im',im)
 #cv2.imshow('out',out)
